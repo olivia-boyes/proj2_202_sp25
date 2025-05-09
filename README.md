@@ -147,6 +147,7 @@ Missing values (`""`) should be handled using `None`.
 Your file should include the following at the top:
 
 ```python
+from __future__ import annotations
 import sys
 import csv
 from typing import *
@@ -278,16 +279,3 @@ Andorra,2010,,,,,,,
 
 If a value is missing, the CSV line will just have empty fields (like `,,,,`), which appear as empty strings (`""`). You must convert these to `None`.
 
----
-
-### 🔍 What You’ll Do
-
-- Read each line from the CSV  
-- Parse it into a `Row` object  
-- Chain the rows together using your custom linked list  
-- Write functions to:
-  - Filter by country or year
-  - Compare per-capita values
-  - Estimate population or compute growth
-
-This assignment models how real-world **data pipelines** work — loading, validating, filtering, and analyzing large, messy datasets using linked structures and clean recursive logic.
