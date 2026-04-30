@@ -25,7 +25,8 @@ class Row:
 @dataclass(frozen=True)
 class Node:
     value:Row
-    next:'Node|None' = None
+    next: 'Node|None' = None
+
 
 # Then your functions.
 #task 2: Reading CSV File
@@ -49,38 +50,75 @@ def read_csv_lines(filename: str) -> Optional[Node]:
                             "total_co2_emissions_excluding_lucf_per_capita"]
         if headers != expected_headers:
             raise ValueError("Missing Header or Wrong Format")
-        #convert row into Row object
-        def row_parse(fields:list[str]) -> Row:
-            row_obj = Row(country= None if fields[0] == "" else fields[0],
-                          year=None if fields[1] == "" else int(fields[1]),
-                          electricity_and_heat_co2_emissions= None if fields[2] == "" else float(fields[2]),
-                          electricity_and_heat_co2_emissions_per_capita=None if fields[3] == "" else float(fields[3]),
-                          energy_co2_emissions=None if fields[4] == "" else float(fields[4]),
-                          energy_co2_emissions_per_capita=None if fields[5] == "" else float(fields[5]),
-                          total_co2_emissions_excluding_lucf=None if fields[6] == "" else float(fields[6]),
-                          total_co2_emissions_excluding_lucf_per_capita=None if fields[7] == "" else float(fields[7]))
-            return row_obj
 
         def build_list(data) -> Optional[Node]:
-            head = None
-            tail = None
-            for line in iter(data): #iterates through csv data
-                node:Node = Node(row_parse(line)) #makes a Node with value = Row of a csv line
+            try:
+                line = next(data)
+            except:
+                StopIteration
 
-                if head is None: #for the first iteration, makes the head and tail equal to the node
-                    head: Node = node
-                    tail: Node = node
-                else:
-                    tail.next:Node = node #for the other iterations, makes the tail the next line of the CSV data as a node
-                    tail:Node = node
-
-            return head
+            return Node(parse_row(line), build_list(data))
 
         return build_list(csv_data)
 
-def lenlist(data: Optional[Node]) -> int:
+def listlen(data: Optional[Node]) -> int:
     if data is None:
         return 0
-    return 1 + lenlist(data.next)
+    return 1 + listlen(data.next)
 
+#convert row into Row object
+def parse_row(fields: list[str]) -> Row:
+    row_obj = Row(country=None if fields[0] == "" else fields[0],
+                  year=None if fields[1] == "" else int(fields[1]),
+                  electricity_and_heat_co2_emissions=None if fields[2] == "" else float(fields[2]),
+                  electricity_and_heat_co2_emissions_per_capita=None if fields[3] == "" else float(fields[3]),
+                  energy_co2_emissions=None if fields[4] == "" else float(fields[4]),
+                  energy_co2_emissions_per_capita=None if fields[5] == "" else float(fields[5]),
+                  total_co2_emissions_excluding_lucf=None if fields[6] == "" else float(fields[6]),
+                  total_co2_emissions_excluding_lucf_per_capita=None if fields[7] == "" else float(fields[7]))
+    return row_obj
+
+#task 4
+# go through rows and keep rows that satisfy the condition and return a new filtered linked list
+
+def filter_rows(data: Optional[Node],
+                field_name: str,
+                comparison: str,
+                value: Union[str,float,int]) -> Optional[Node]:
+
+    # check if data is empty
+    if data is None:
+        return None
+
+    filter = filter_rows(data.next, field_name, comparison, value)
+
+    row = data.value # row of csv data
+    field_value = getattr(row, field_name) #am I allowed to use get attribute or is that a
+
+    match = False
+
+    # "equal" comparison
+    if field_name == "country" and comparison != "equal":
+        raise ValueError("Can only use 'equal' to compare the 'country' field.")
+
+    if comparison == "equal":
+        if field_value == value:
+            match = True
+
+    # "less than" comparison
+    elif comparison == "less than":
+        if field_value < value:
+            match = True
+
+    # "greater than" comparison
+    elif comparison == "greater than":
+        if field_value > value:
+            match = True
+
+    #create new filtered linked list
+    if match == True:
+        new_node = Node(row, filter)
+        return new_node
+    else:
+        return filter
 
