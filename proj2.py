@@ -10,32 +10,26 @@ sys.setrecursionlimit(10_000)
 
 # Put your data definitions first!
 #Task 1: data definitions
-
 @dataclass(frozen=True)
 class Row:
-    country:str
-    year:int
-    electricity_and_heat_co2_emissions:float
-    electricity_and_heat_co2_emissions_per_capita:float
-    energy_co2_emissions:float
-    energy_co2_emissions_per_capita:float
-    total_co2_emissions_excluding_lucf:float
-    total_co2_emissions_excluding_lucf_per_capita:float
+    country:Optional[str]
+    year:Optional[int]
+    electricity_and_heat_co2_emissions: Optional[float]
+    electricity_and_heat_co2_emissions_per_capita: Optional[float]
+    energy_co2_emissions: Optional[float]
+    energy_co2_emissions_per_capita:Optional[float]
+    total_co2_emissions_excluding_lucf: Optional[float]
+    total_co2_emissions_excluding_lucf_per_capita: Optional[float]
 
 @dataclass(frozen=True)
 class Node:
     value:Row
-    next: 'Node|None' = None
-
+    next:'Node|None' = None
 
 # Then your functions.
 #task 2: Reading CSV File
 
-'''Uses the csv.reader class to load rows
-Validates the header row
-Converts each row into a Row object
-Recursively builds and returns a linked list (Node → Node → ... → None)'''
-
+#Validate header row, convert each row into a Row object, and return a linked list with each Node containing a Row object
 def read_csv_lines(filename: str) -> Optional[Node]:
 
     with open(filename, newline="") as csvfile:
@@ -51,20 +45,16 @@ def read_csv_lines(filename: str) -> Optional[Node]:
         if headers != expected_headers:
             raise ValueError("Missing Header or Wrong Format")
 
+        #recursively make a linked list of nodes with each node containing one line of csv data
         def build_list(data) -> Optional[Node]:
             try:
                 line = next(data)
-            except:
-                StopIteration
+            except StopIteration:
+                return None
 
             return Node(parse_row(line), build_list(data))
 
         return build_list(csv_data)
-
-def listlen(data: Optional[Node]) -> int:
-    if data is None:
-        return 0
-    return 1 + listlen(data.next)
 
 #convert row into Row object
 def parse_row(fields: list[str]) -> Row:
@@ -78,8 +68,15 @@ def parse_row(fields: list[str]) -> Row:
                   total_co2_emissions_excluding_lucf_per_capita=None if fields[7] == "" else float(fields[7]))
     return row_obj
 
+#task 3
+#count the number of rows in the linked list of csv data
+def listlen(data: Optional[Node]) -> int:
+    if data is None:
+        return 0
+    return 1 + listlen(data.next)
+
 #task 4
-# go through rows and keep rows that satisfy the condition and return a new filtered linked list
+#iterate through rows and return a new filtered linked list of Rows that match the provided condition
 
 def filter_rows(data: Optional[Node],
                 field_name: str,
@@ -90,12 +87,15 @@ def filter_rows(data: Optional[Node],
     if data is None:
         return None
 
-    filter = filter_rows(data.next, field_name, comparison, value)
+    filtered = filter_rows(data.next, field_name, comparison, value)
 
-    row = data.value # row of csv data
-    field_value = getattr(row, field_name) #am I allowed to use get attribute or is that a
+    row:Row = data.value # row of csv data
+    field_value = getattr(row, field_name)
 
-    match = False
+    if field_value is None:
+        return filtered
+
+    match: bool = False
 
     # "equal" comparison
     if field_name == "country" and comparison != "equal":
@@ -106,19 +106,21 @@ def filter_rows(data: Optional[Node],
             match = True
 
     # "less than" comparison
-    elif comparison == "less than":
+    elif comparison == "less_than":
         if field_value < value:
             match = True
 
     # "greater than" comparison
-    elif comparison == "greater than":
+    elif comparison == "greater_than":
         if field_value > value:
             match = True
 
+    else:
+        raise ValueError
+
     #create new filtered linked list
     if match == True:
-        new_node = Node(row, filter)
+        new_node:Node = Node(row, filtered)
         return new_node
     else:
-        return filter
-
+        return filtered

@@ -1,0 +1,9 @@
+country,year,electricity_and_heat_co2_emissions,electricity_and_heat_co2_emissions_per_capita,energy_co2_emissions,energy_co2_emissions_per_capita,total_co2_emissions_excluding_lucf,total_co2_emissions_excluding_lucf_per_capita
+Laos,1990,,,0.51,0.11820764,0.51,0.11820764
+Jordan,2018,9.53,0.9111017,22.99,2.1979253,24.71,2.3623633
+Indonesia,1995,74.27,0.37483567,210.37,1.0617232,223.68,1.1288979
+Ireland,1990,10.87,3.1187506,30.08,8.630361,30.96,8.882845
+Japan,1992,444.89,3.5750017,1073.37,8.6252775,1115.04,8.960125
+Japan,1994,470.26,3.758494,1118.46,8.93915,1160.76,9.277229
+Japan,2005,519.54,4.0653095,1183.19,9.258254,1215.47,9.51084
+Iceland,2005,0.01,0.03366584,2.21,7.4401507,2.26,7.60848
